@@ -1,6 +1,6 @@
 class Employee {
   //parent class constructor
-  constructor(id, name, email) {
+  constructor(name, id, email) {
     //setting class attributes
     this.id = id;
     this.name = name;
