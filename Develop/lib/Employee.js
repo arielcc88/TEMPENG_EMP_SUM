@@ -1,4 +1,3 @@
-// TODO: Write code to define and export the Employee class
 class Employee {
   //parent class constructor
   constructor(id, name, email) {
@@ -12,7 +11,7 @@ class Employee {
     METHODS
     --------*/
   //get employee's ID
-  getID() {
+  getId() {
     return this.id;
   }
 
@@ -25,4 +24,12 @@ class Employee {
   getEmail() {
     return this.email;
   }
+
+  //get Role -> defaults to Employee
+  getRole() {
+    return "Employee";
+  }
 }
+
+//exporting parent class
+module.exports = Employee;
