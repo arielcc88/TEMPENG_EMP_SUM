@@ -2,6 +2,8 @@ const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
 const inquirer = require("inquirer");
+//requiring rxjs for dynamic addition of questions
+const { Observable } = require("rxjs");
 const path = require("path");
 const fs = require("fs");
 
@@ -10,9 +12,58 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
-
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
+
+let emitter; //to serve the questions
+var prompts = Observable.create(function (e) {
+  emitter = e;
+  // need to start with at least one question here
+  emitter.next({
+    type: "input",
+    name: "ename",
+    message: "Enter employee's name:",
+  });
+});
+
+inquirer.prompt(prompts).ui.process.subscribe(
+  (q) => {
+    if (q.answer.toLowerCase() === "pear") {
+      console.log(q);
+      console.log("That's Great. I would never forget a Pear-eater.");
+      emitter.complete();
+    }
+
+    emitter.next({
+      type: "list",
+      name: "fruits",
+      message:
+        "Sorry, what is your favorite fruit? I forgot, was it " +
+        q.answer +
+        ", or something else?",
+      choices: [
+        {
+          name: "Uh, Banana..",
+          value: "banana",
+        },
+        {
+          name: "Uh, Apple..",
+          value: "apple",
+        },
+        {
+          name: "Pear!",
+          value: "pear",
+        },
+      ],
+    });
+  },
+  (error) => {
+    console.log("Hm, an error happened. Why?");
+  },
+  (complete) => {
+    console.log("I think we are done now.");
+  }
+);
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
