@@ -34,7 +34,7 @@ var prompts = Observable.create(function (e) {
   //using RxJS observables to dynamically change questions depending on role
   emitter = e;
   // need to start with at least one question here
-  emitter.next(questions[promptIterator]);
+  emitter.next(questions[7]);
 });
 
 //subscribing observable to access answers
@@ -50,7 +50,7 @@ inquirer.prompt(prompts).ui.process.subscribe(
             promptIterator++;
           } else {
             console.log(
-              `This team already has a Manager. Please select a different role.`
+              `--------- ERR!! => This team already has a Manager. Please select a different role. ---------`
             );
           }
           emitter.next(questions[promptIterator]);
@@ -67,6 +67,9 @@ inquirer.prompt(prompts).ui.process.subscribe(
           break;
 
         default:
+          //terminating app
+          console.log("The App has found an error defining: Role.");
+          emitter.error();
           break;
       }
     } else if (
@@ -76,7 +79,6 @@ inquirer.prompt(prompts).ui.process.subscribe(
     ) {
       //storing answer into empConstruct
       empConstruct[q.name] = q.answer;
-      console.log("empConstruct", empConstruct);
       switch (q.name) {
         case "mg_offnum":
           myTeam.manager = new Manager(
@@ -111,11 +113,46 @@ inquirer.prompt(prompts).ui.process.subscribe(
           break;
 
         default:
+          //finishing app
+          console.log("The App has found an error defining: Employee.");
+          emitter.error();
           break;
       }
       console.log(myTeam);
+      console.log("--------- Employee added successfully!  ---------");
+      //prompt for menu
+      emitter.next(questions[7]);
       //closing observable
-      emitter.complete();
+      //emitter.complete();
+    } else if (q.name === "nxt_action") {
+      //cases:
+      //add new employee: restart prompIterator and fire question
+      //generate roster: verifies if team has manager + 1 member first, if so, creates roster
+      //exit
+      switch (q.answer) {
+        case "Add New Employee":
+          promptIterator = 0;
+          emitter.next(questions[promptIterator]);
+          break;
+        case "Generate Roster":
+          //verifying Manager is added in current team and at least a member exists
+          if (myTeam.has_manager && myTeam.members.length > 0) {
+            //call render function
+            console.log("--------- Rendering Roster ---------");
+          } else {
+            //informing user, a manager and at least a team member are required.
+            console.log(
+              "--------- ERR!! => Roster cannot be generated. A Manager and at least a team member are required. ---------"
+            );
+            emitter.next(questions[7]);
+          }
+          break;
+        case "Exit":
+          emitter.complete();
+          break;
+        default:
+          break;
+      }
     } else {
       //storing answer into empConstruct
       empConstruct[q.name] = q.answer;
@@ -125,10 +162,10 @@ inquirer.prompt(prompts).ui.process.subscribe(
     }
   },
   (error) => {
-    console.log("Hm, an error happened. Why?");
+    console.log("--------- Please restart the Application. ---------");
   },
   (complete) => {
-    console.log("I think we are done now.");
+    console.log("--------- Exiting Application. Bye! ---------");
   }
 );
 
