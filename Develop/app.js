@@ -118,7 +118,7 @@ inquirer.prompt(prompts).ui.process.subscribe(
           emitter.error();
           break;
       }
-      console.log(myTeam);
+      // console.log(myTeam);
       console.log("--------- Employee added successfully!  ---------");
       //prompt for menu
       emitter.next(questions[7]);
@@ -139,6 +139,12 @@ inquirer.prompt(prompts).ui.process.subscribe(
           if (myTeam.has_manager && myTeam.members.length > 0) {
             //call render function
             console.log("--------- Rendering Roster ---------");
+            const empGroup = [];
+            empGroup.push(myTeam.manager);
+            empGroup.push(...myTeam.members);
+            //calling render function
+            console.log(render(empGroup));
+            emitter.complete();
           } else {
             //informing user, a manager and at least a team member are required.
             console.log(
@@ -168,6 +174,13 @@ inquirer.prompt(prompts).ui.process.subscribe(
     console.log("--------- Exiting Application. Bye! ---------");
   }
 );
+
+function isThereAFile(filePath) {}
+
+function fnWriteToFileHTML(filePath, fileContent) {
+  const fsTream = fs.createWriteStream(filePath, { flags: "a" });
+  fsTream.write(fileContent);
+}
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
