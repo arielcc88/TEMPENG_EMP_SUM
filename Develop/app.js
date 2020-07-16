@@ -19,6 +19,8 @@ const myTeam = {
 };
 const empConstruct = {}; //this object will temporarily store employee's attributes
 let promptIterator = 0;
+const outputDirName = "output";
+const filePath = "./" + outputDirName + "/team_roster.html";
 let emitter; //to serve the questions
 
 // Write code to use inquirer to gather information about the development team members,
@@ -144,6 +146,7 @@ inquirer.prompt(prompts).ui.process.subscribe(
             empGroup.push(...myTeam.members);
             //calling render function
             console.log(render(empGroup));
+            fnWriteToFileHTML(filePath, render(empGroup));
             emitter.complete();
           } else {
             //informing user, a manager and at least a team member are required.
@@ -175,9 +178,50 @@ inquirer.prompt(prompts).ui.process.subscribe(
   }
 );
 
-function isThereAFile(filePath) {}
+function isThereADir() {
+  fs.access(outputDirName, function (err) {
+    if (err && err.code === "ENOENT") {
+      //creating output file if none exists
+      fs.mkdir(outputDirName);
+    }
+  });
+}
+
+function IsThereAFile(filePath) {
+  try {
+    return fs.existsSync(filePath);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function fnDeleteExistingFile(filePath) {
+  //logging
+  console.log(`---- Deleting existing ${filePath} ----`);
+  try {
+    fs.unlinkSync(filePath);
+    console.log(`---- ${filePath} deleted successfully ----`);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function fnCreateEmptyFile(filePath) {
+  try {
+    fs.closeSync(fs.openSync(filePath, "w"));
+    console.log(`---- New ${filePath} created ----`);
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 function fnWriteToFileHTML(filePath, fileContent) {
+  isThereADir();
+  //checking for file
+  if (IsThereAFile(filePath)) {
+    fnDeleteExistingFile(filePath);
+  }
+  fnCreateEmptyFile(filePath);
   const fsTream = fs.createWriteStream(filePath, { flags: "a" });
   fsTream.write(fileContent);
 }
