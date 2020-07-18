@@ -19,8 +19,8 @@ const myTeam = {
 };
 const empConstruct = {}; //this object will temporarily store employee's attributes
 let promptIterator = 0;
-const outputDirName = "output";
-const filePath = "./" + outputDirName + "/team_roster.html";
+// const outputDirName = "output";
+// const filePath = "./" + outputDirName + "/team_roster.html";
 let emitter; //to serve the questions
 
 // Write code to use inquirer to gather information about the development team members,
@@ -32,7 +32,7 @@ console.log(`
 --------------------------
 `);
 
-var prompts = Observable.create(function (e) {
+const prompts = Observable.create(function (e) {
   //using RxJS observables to dynamically change questions depending on role
   emitter = e;
   // need to start with at least one question here
@@ -145,8 +145,7 @@ inquirer.prompt(prompts).ui.process.subscribe(
             empGroup.push(myTeam.manager);
             empGroup.push(...myTeam.members);
             //calling render function
-            console.log(render(empGroup));
-            fnWriteToFileHTML(filePath, render(empGroup));
+            fnWriteToFileHTML(outputPath, render(empGroup));
             emitter.complete();
           } else {
             //informing user, a manager and at least a team member are required.
@@ -179,12 +178,18 @@ inquirer.prompt(prompts).ui.process.subscribe(
 );
 
 function isThereADir() {
-  fs.access(outputDirName, function (err) {
+
+  try { 
+    fs.accessSync(OUTPUT_DIR, fs.constants.F_OK); 
+    console.log("--------- Output directory verified! ---------"); 
+  } catch (err) { 
+    console.error("--------- Output directory not found. Creating directory.... ---------"); 
     if (err && err.code === "ENOENT") {
       //creating output file if none exists
-      fs.mkdir(outputDirName);
+      fs.mkdirSync(OUTPUT_DIR);
+      console.log("--------- Output directory created and verified! ---------");
     }
-  });
+  }
 }
 
 function IsThereAFile(filePath) {
@@ -225,23 +230,3 @@ function fnWriteToFileHTML(filePath, fileContent) {
   const fsTream = fs.createWriteStream(filePath, { flags: "a" });
   fsTream.write(fileContent);
 }
-
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
